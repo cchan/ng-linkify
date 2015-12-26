@@ -9,6 +9,8 @@ Install
 -------
 HTML:
 
+	<script src="linkify.js"></script>
+	<script src="linkify-string.js"></script>
 	<script src="ng-linkify.js"></script>
 
 JS:
