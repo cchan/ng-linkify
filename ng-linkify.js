@@ -1,29 +1,19 @@
-angular.module("linkify", [])
+angular.module("linkify", ["ngSanitize"])
 .filter('linkify', ['$sanitize', function($sanitize) {
-  var LINKY_URL_REGEXP =
-        /((ftp|https?):\/\/|(www\.)|(mailto:)?[A-Za-z0-9._%+-]+@)\S*[^\s.;,(){}<>"\u201d\u2019]/i,
-      MAILTO_REGEXP = /^mailto:/i;
-
   return function(text, target, attributes) {
     if (!text) return text;
-    var match;
-    var raw = text;
     var html = [];
-    var url;
-    var i;
-    while ((match = raw.match(LINKY_URL_REGEXP))) {
-      // We can not end in these as they are sometimes found at the end of the sentence
-      url = match[0];
-      // if we did not match ftp/http/www/mailto then assume mailto
-      if (!match[2] && !match[4]) {
-        url = (match[3] ? 'http://' : 'mailto:') + url;
-      }
-      i = match.index;
-      addText(raw.substr(0, i));
-      addLink(url, match[0].replace(MAILTO_REGEXP, ''));
-      raw = raw.substring(i + match[0].length);
-    }
-    addText(raw);
+	var matches = linkify.find(text);
+	var prevEnd = 0;
+	for(var i = 0; i < matches.length; i++){
+		var startLink = text.indexOf(matches[i].value, prevEnd);
+		
+		addText(text.substr(prevEnd, startLink - prevEnd));
+		addLink(matches[i].href, matches[i].value);
+		
+		prevEnd = startLink + matches[i].value.length;
+	}
+	addText(text.substr(prevEnd, text.length - prevEnd));
     return $sanitize(html.join(''));
 
     function addText(text) {
